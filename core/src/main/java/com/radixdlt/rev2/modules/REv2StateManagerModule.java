@@ -143,7 +143,8 @@ public final class REv2StateManagerModule extends AbstractModule {
       Option<RustMempoolConfig> mempoolConfig,
       StateHashTreeGcConfig stateHashTreeGcConfig,
       LedgerProofsGcConfig ledgerProofsGcConfig,
-      LedgerSyncLimitsConfig ledgerSyncLimitsConfig) {
+      LedgerSyncLimitsConfig ledgerSyncLimitsConfig,
+      ProtocolConfig protocolConfig) {
     return new REv2StateManagerModule(
         proposalLimitsConfig,
         Option.some(vertexLimitsConfig),
@@ -153,7 +154,7 @@ public final class REv2StateManagerModule extends AbstractModule {
         stateHashTreeGcConfig,
         ledgerProofsGcConfig,
         ledgerSyncLimitsConfig,
-        ProtocolConfig.productionDefault(),
+        protocolConfig,
         false);
   }
 

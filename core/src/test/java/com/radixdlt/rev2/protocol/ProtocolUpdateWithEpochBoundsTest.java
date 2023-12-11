@@ -294,7 +294,9 @@ public final class ProtocolUpdateWithEpochBoundsTest {
 
   @Test
   public void test_protocol_update_scenario() {
-    final var protocolConfig = new ProtocolConfig("genesis", scenario.protocolUpdates);
+    final var protocolConfig =
+        new ProtocolConfig(
+            ProtocolConfig.testingDefault().genesisProtocolVersion(), scenario.protocolUpdates);
     try (var test = createTest(protocolConfig)) {
       test.startAllNodes();
 

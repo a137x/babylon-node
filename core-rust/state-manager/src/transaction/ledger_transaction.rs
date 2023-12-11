@@ -133,6 +133,20 @@ pub struct FlashTransactionV1 {
     pub state_updates: StateUpdates,
 }
 
+impl FlashTransactionV1 {
+    pub fn prepare(&self) -> Result<PreparedFlashTransactionV1, PrepareError> {
+        let state_updates_hash = hash(scrypto_encode(&self.state_updates).unwrap());
+        Ok(PreparedFlashTransactionV1 {
+            state_updates: self.state_updates.clone(),
+            summary: Summary {
+                effective_length: 0,
+                total_bytes_hashed: 0,
+                hash: state_updates_hash,
+            },
+        })
+    }
+}
+
 pub struct PreparedLedgerTransaction {
     pub inner: PreparedLedgerTransactionInner,
     pub summary: Summary,
@@ -255,6 +269,11 @@ impl TransactionFullChildPreparable for PreparedLedgerTransactionInner {
                     PreparedRoundUpdateTransactionV1::prepare_as_full_body_child(decoder)?;
                 PreparedLedgerTransactionInner::RoundUpdateV1(Box::new(prepared))
             }
+            FLASH_V1_LEDGER_TRANSACTION_DISCRIMINATOR => {
+                check_length(length, 1)?;
+                let prepared = PreparedFlashTransactionV1::prepare_as_full_body_child(decoder)?;
+                PreparedLedgerTransactionInner::FlashV1(Box::new(prepared))
+            }
             _ => return Err(unknown_discriminator(discriminator)),
         };
         decoder.track_stack_depth_decrease()?;
@@ -318,6 +337,13 @@ impl HasSummary for PreparedFlashTransactionV1 {
 impl HasFlashTransactionHash for PreparedFlashTransactionV1 {
     fn flash_transaction_hash(&self) -> FlashTransactionHash {
         FlashTransactionHash(self.summary.hash)
+    }
+}
+
+impl TransactionFullChildPreparable for PreparedFlashTransactionV1 {
+    fn prepare_as_full_body_child(decoder: &mut TransactionDecoder) -> Result<Self, PrepareError> {
+        let decoded = decoder.decode::<FlashTransactionV1>()?;
+        decoded.prepare()
     }
 }
 

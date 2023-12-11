@@ -62,68 +62,36 @@
  * permissions under this License.
  */
 
-use crate::{ProtocolConfig, ProtocolUpdate};
-use jni::objects::{JClass, JObject};
-use jni::sys::jbyteArray;
-use jni::JNIEnv;
-use radix_engine::types::*;
+package com.radixdlt.rev2;
 
-use node_common::java::*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeToken;
+import com.radixdlt.protocol.ProtocolConfig;
+import com.radixdlt.protocol.ProtocolUpdate;
+import com.radixdlt.protocol.ProtocolUpdateEnactmentCondition;
+import com.radixdlt.sbor.NodeSborCodecs;
+import org.bouncycastle.util.encoders.Hex;
+import org.junit.Ignore;
+import org.junit.Test;
 
-use super::node_rust_environment::JNINodeRustEnvironment;
+@Ignore
+// Just a utility for testing, intended to be run manually
+public final class ProtocolConfigGeneratorTest {
+  @Test
+  public void generateProtocolConfig() {
+    final var protocolConfig =
+        new ProtocolConfig(
+            "babylon-genesis",
+            ImmutableList.of(
+                new ProtocolUpdate(
+                    "v2",
+                    ProtocolUpdateEnactmentCondition.singleReadinessThresholdBetweenEpochs(
+                        5, 20, Decimal.ofNonNegativeFraction(7, 10), 1))));
 
-//
-// JNI Interface
-//
+    final var protocolConfigBytes =
+        NodeSborCodecs.encode(protocolConfig, NodeSborCodecs.resolveCodec(new TypeToken<>() {}));
 
-#[no_mangle]
-extern "system" fn Java_com_radixdlt_protocol_RustProtocolUpdate_applyProtocolUpdate(
-    env: JNIEnv,
-    _class: JClass,
-    j_node_rust_env: JObject,
-    request_payload: jbyteArray,
-) -> jbyteArray {
-    jni_sbor_coded_fallible_call(
-        &env,
-        request_payload,
-        |protocol_version_name: String| -> JavaResult<()> {
-            JNINodeRustEnvironment::get(&env, j_node_rust_env)
-                .state_manager
-                .apply_protocol_update(&protocol_version_name);
-            Ok(())
-        },
-    )
+    System.out.println("protocol.custom_config=" + Hex.toHexString(protocolConfigBytes));
+    System.out.println("RADIXDLT_PROTOCOL_CUSTOM_CONFIG=" + Hex.toHexString(protocolConfigBytes));
+  }
 }
-
-#[no_mangle]
-extern "system" fn Java_com_radixdlt_protocol_ProtocolUpdates_nativeReadinessSignalName(
-    env: JNIEnv,
-    _class: JClass,
-    request_payload: jbyteArray,
-) -> jbyteArray {
-    jni_sbor_coded_call(&env, request_payload, |protocol_update: ProtocolUpdate| {
-        protocol_update.readiness_signal_name()
-    })
-}
-
-#[no_mangle]
-extern "system" fn Java_com_radixdlt_protocol_ProtocolUpdates_nativeMainnetConfig(
-    env: JNIEnv,
-    _class: JClass,
-    request_payload: jbyteArray,
-) -> jbyteArray {
-    jni_sbor_coded_call(&env, request_payload, |_: ()| ProtocolConfig::mainnet())
-}
-
-#[no_mangle]
-extern "system" fn Java_com_radixdlt_protocol_ProtocolUpdates_nativeTestingDefaultConfig(
-    env: JNIEnv,
-    _class: JClass,
-    request_payload: jbyteArray,
-) -> jbyteArray {
-    jni_sbor_coded_call(&env, request_payload, |_: ()| {
-        ProtocolConfig::testing_default()
-    })
-}
-
-pub fn export_extern_functions() {}

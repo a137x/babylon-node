@@ -227,7 +227,10 @@ impl VersionedCf for EpochLedgerProofsCf {
 /// Schema: `Epoch.to_bytes()` -> `scrypto_encode(VersionedLedgerProof)`
 /// Note: This duplicates a small subset of [`StateVersionToLedgerProof`]'s values.
 struct ProtocolUpdateLedgerProofsCf;
-impl VersionedCf<StateVersion, LedgerProof> for ProtocolUpdateLedgerProofsCf {
+impl VersionedCf for ProtocolUpdateLedgerProofsCf {
+    type Key = StateVersion;
+    type Value = LedgerProof;
+
     const VERSIONED_NAME: &'static str = "protocol_update_ledger_proofs";
     type KeyCodec = StateVersionDbCodec;
     type VersionedValue = VersionedLedgerProof;

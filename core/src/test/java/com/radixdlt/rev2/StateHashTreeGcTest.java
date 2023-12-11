@@ -126,7 +126,7 @@ public final class StateHashTreeGcTest {
                             UInt64.fromNonNegativeLong(stateVersionHistoryLength)),
                         LedgerProofsGcConfig.forTesting(),
                         LedgerSyncLimitsConfig.defaults(),
-                        ProtocolConfig.testingDefaultNoUpdates(),
+                        ProtocolConfig.testingDefault(),
                         false))));
   }
 
