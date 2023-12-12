@@ -455,6 +455,12 @@ impl MainnetProtocolUpdaterFactory {
     }
 }
 
+impl Default for MainnetProtocolUpdaterFactory {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ProtocolUpdaterFactory for MainnetProtocolUpdaterFactory {
     fn supports_protocol_version(&self, protocol_version_name: &str) -> bool {
         [GENESIS_PROTOCOL_VERSION].contains(&protocol_version_name)

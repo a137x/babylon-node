@@ -104,7 +104,7 @@ impl ProtocolConfig {
 
     pub fn sanity_check(
         &self,
-        protocol_updater_factory: &Box<dyn ProtocolUpdaterFactory + Send + Sync>,
+        protocol_updater_factory: &(dyn ProtocolUpdaterFactory + Send + Sync),
     ) -> Result<(), String> {
         let mut protocol_versions = btreeset!();
 

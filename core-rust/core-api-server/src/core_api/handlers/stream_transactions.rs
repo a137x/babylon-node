@@ -222,6 +222,7 @@ pub fn to_api_ledger_header(
             Some(Box::new(models::NextEpoch {
                 epoch: to_api_epoch(mapping_context, next_epoch.epoch)?,
                 validators,
+                significant_protocol_update_readiness: None,
             }))
         }
         None => None,

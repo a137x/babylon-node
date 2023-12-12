@@ -185,7 +185,7 @@ impl StateManager {
 
         if let Err(err) = config
             .protocol_config
-            .sanity_check(&protocol_updater_factory)
+            .sanity_check(protocol_updater_factory.deref())
         {
             panic!("Protocol misconfiguration: {}", err);
         };

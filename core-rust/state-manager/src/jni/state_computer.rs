@@ -62,7 +62,6 @@
  * permissions under this License.
  */
 
-use std::ops::Deref;
 use crate::{CommitSummary, LedgerProof};
 use jni::objects::{JClass, JObject};
 use jni::sys::jbyteArray;

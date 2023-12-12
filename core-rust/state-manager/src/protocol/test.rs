@@ -97,7 +97,7 @@ use crate::{
 };
 
 use crate::query::TransactionIdentifierLoader;
-use crate::traits::CommitStore;
+// use crate::traits::CommitStore;
 
 const GENESIS_PROTOCOL_VERSION: &str = "testing-genesis";
 const V2_PROTOCOL_VERSION: &str = "testing-v2";
