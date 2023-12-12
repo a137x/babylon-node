@@ -62,6 +62,7 @@
  * permissions under this License.
  */
 
+use std::ops::Deref;
 use crate::{CommitSummary, LedgerProof};
 use jni::objects::{JClass, JObject};
 use jni::sys::jbyteArray;
@@ -205,8 +206,8 @@ extern "system" fn Java_com_radixdlt_statecomputer_RustStateComputer_newestProto
     request_payload: jbyteArray,
 ) -> jbyteArray {
     jni_sbor_coded_call(&env, request_payload, |_: ()| -> String {
-        let state_computer = JNINodeRustEnvironment::get_state_computer(&env, j_node_rust_env);
-        state_computer.newest_protocol_version()
+        let env = JNINodeRustEnvironment::get(&env, j_node_rust_env);
+        env.state_manager.newest_protocol_version()
     })
 }
 

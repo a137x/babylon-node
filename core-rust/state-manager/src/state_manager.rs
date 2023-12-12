@@ -351,4 +351,13 @@ impl StateManager {
 
         // TODO: recalculate mempool/txn result cache
     }
+
+    pub fn newest_protocol_version(&self) -> String {
+        let protocol_config = &self.config.protocol_config;
+        protocol_config
+            .protocol_updates
+            .last()
+            .map(|protocol_update| protocol_update.next_protocol_version.clone())
+            .unwrap_or(protocol_config.genesis_protocol_version.clone())
+    }
 }

@@ -1423,17 +1423,6 @@ where
     pub fn current_protocol_version(&self) -> String {
         self.protocol_state.read().current_protocol_version.clone()
     }
-
-    pub fn newest_protocol_version(&self) -> String {
-        "".to_string() // TODO: implement me
-                       /*
-                       self.protocol_config
-                           .protocol_updates
-                           .last()
-                           .map(|protocol_update| protocol_update.next_protocol_version.clone())
-                           .unwrap_or(self.protocol_config.genesis_protocol_version.clone())
-                        */
-    }
 }
 
 pub struct CommittedUserTransactionIdentifiers {
