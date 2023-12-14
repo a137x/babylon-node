@@ -65,6 +65,7 @@
 package com.radixdlt;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.AbstractModule;
 import com.radixdlt.addressing.Addressing;
@@ -95,6 +96,9 @@ import com.radixdlt.p2p.capability.AppVersionCapability;
 import com.radixdlt.p2p.capability.Capabilities;
 import com.radixdlt.p2p.capability.LedgerSyncCapability;
 import com.radixdlt.protocol.ProtocolConfig;
+import com.radixdlt.protocol.ProtocolUpdate;
+import com.radixdlt.protocol.ProtocolUpdateEnactmentCondition;
+import com.radixdlt.rev2.Decimal;
 import com.radixdlt.rev2.modules.*;
 import com.radixdlt.sbor.NodeSborCodecs;
 import com.radixdlt.store.NodeStorageLocationFromPropertiesModule;
@@ -109,6 +113,8 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.util.encoders.Hex;
+
+import static com.radixdlt.lang.Tuple.tuple;
 
 /** Module which manages everything in a single node */
 public final class RadixNodeModule extends AbstractModule {
@@ -357,7 +363,7 @@ public final class RadixNodeModule extends AbstractModule {
 
     final var customProtocolConfig = properties.get("protocol.custom_config", "");
 
-    ProtocolConfig protocolConfig;
+    final ProtocolConfig protocolConfig;
     if (!customProtocolConfig.isEmpty()) {
       protocolConfig =
           NodeSborCodecs.decode(
@@ -365,7 +371,16 @@ public final class RadixNodeModule extends AbstractModule {
     } else if (network.getId() == Network.MAINNET.getId()) {
       protocolConfig = ProtocolConfig.mainnet();
     } else {
-      protocolConfig = ProtocolConfig.testingDefault();
+//      protocolConfig = ProtocolConfig.testingDefault();
+
+      protocolConfig = new ProtocolConfig("babylon-genesis",
+              ImmutableList.of(
+                      new ProtocolUpdate("v2-at-ver-2k", ProtocolUpdateEnactmentCondition.unconditionallyAtStateVersion(2000L)),
+                      new ProtocolUpdate("v3-voting", ProtocolUpdateEnactmentCondition.readinessThresholdsBetweenEpochs(10, 10000L, ImmutableList.of(
+                            tuple(Decimal.ofNonNegativeFraction(1, 2), 5L),
+                            tuple(Decimal.ofNonNegative(1), 100L)
+                      )))
+              ));
     }
 
     install(

@@ -17,7 +17,7 @@ const MAX_PROTOCOL_VERSION_NAME_LEN: usize = 16;
 pub fn padded_protocol_version_name(unpadded_protocol_version_name: &str) -> String {
     let mut res = "".to_owned();
     for _ in 0..16 - unpadded_protocol_version_name.len() {
-        res.push('\0');
+        res.push('0');
     }
     res.push_str(unpadded_protocol_version_name);
     res
@@ -34,7 +34,7 @@ impl ProtocolUpdate {
         // Readiness signal name is 32 bytes long and consists of:
         // - 16 leading bytes of `hash(enactment_condition + next_protocol_version)`
         // - protocol version name: 16 bytes,
-        //      left padded with 0s if protocol version name is shorter than 16 characters
+        //      left padded with ASCII 0's if protocol version name is shorter than 16 characters
         let mut bytes_to_hash = scrypto_encode(&self.enactment_condition).unwrap();
         bytes_to_hash.extend_from_slice(self.next_protocol_version.as_bytes());
         let protocol_update_hash = hash(&bytes_to_hash);

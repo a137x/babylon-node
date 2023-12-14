@@ -1423,6 +1423,10 @@ where
     pub fn current_protocol_version(&self) -> String {
         self.protocol_state.read().current_protocol_version.clone()
     }
+
+    pub fn protocol_state(&self) -> ProtocolState {
+        self.protocol_state.read().deref().clone()
+    }
 }
 
 pub struct CommittedUserTransactionIdentifiers {

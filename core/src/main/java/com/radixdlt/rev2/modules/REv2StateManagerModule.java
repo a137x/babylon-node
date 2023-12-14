@@ -188,6 +188,7 @@ public final class REv2StateManagerModule extends AbstractModule {
     bind(TransactionsAndProofReader.class).to(REv2TransactionsAndProofReader.class);
     bind(DatabaseFlags.class).toInstance(databaseFlags);
     bind(LedgerSyncLimitsConfig.class).toInstance(ledgerSyncLimitsConfig);
+    bind(ProtocolConfig.class).toInstance(protocolConfig);
     install(proposalLimitsConfig.asModule());
 
     install(

@@ -1,6 +1,7 @@
 use radix_engine::blueprints::consensus_manager::EpochChangeEvent;
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
+use radix_engine::prelude::{ScryptoCategorize, ScryptoDecode, ScryptoEncode};
 
 use radix_engine_common::constants::CONSENSUS_MANAGER;
 
@@ -27,20 +28,21 @@ use crate::{
 // This file contains types and utilities for
 // managing the (dynamic) protocol state of a running node.
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, ScryptoCategorize, ScryptoEncode, ScryptoDecode)]
 pub struct ProtocolState {
     pub current_epoch: Option<Epoch>,
     pub current_protocol_version: String,
+    pub enacted_protocol_updates: BTreeMap<StateVersion, String>,
     pub unenacted_protocol_updates: Vec<UnenactedProtocolUpdate>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, ScryptoCategorize, ScryptoEncode, ScryptoDecode)]
 pub struct UnenactedProtocolUpdate {
     pub protocol_update: ProtocolUpdate,
     pub state: UnenactedProtocolUpdateState,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, ScryptoCategorize, ScryptoEncode, ScryptoDecode)]
 pub enum UnenactedProtocolUpdateState {
     ForSignalledReadinessSupportCondition {
         thresholds_state: Vec<(
@@ -52,7 +54,7 @@ pub enum UnenactedProtocolUpdateState {
     Empty,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, ScryptoCategorize, ScryptoEncode, ScryptoDecode)]
 pub struct SignalledReadinessThresholdState {
     /// A number of consecutive epochs on or above the threshold,
     /// including the current (uncompleted) epoch.
@@ -453,6 +455,7 @@ pub fn compute_initial_protocol_state<
     ProtocolState {
         current_epoch: current_epoch_opt,
         current_protocol_version,
+        enacted_protocol_updates: actually_enacted_protocol_updates,
         unenacted_protocol_updates,
     }
 }
@@ -583,13 +586,6 @@ pub fn compute_new_protocol_state(
         }
     }
 
-    if enactable_protocol_updates.len() > 1 {
-        panic!(
-            "Invalid state: more than one protocol update is enactable at state version {:?}",
-            post_execute_state_version
-        )
-    }
-
     // This isn't really a right place for this log, but will do for now
     for expired_protocol_update in expired_protocol_updates {
         info!(
@@ -601,11 +597,24 @@ pub fn compute_new_protocol_state(
         );
     }
 
+    if enactable_protocol_updates.len() > 1 {
+        panic!(
+            "Invalid state: more than one protocol update is enactable at state version {:?}",
+            post_execute_state_version
+        )
+    }
+    let next_protocol_version = enactable_protocol_updates.into_iter().next();
+
     new_protocol_state.unenacted_protocol_updates = non_expired_unenacted_protocol_updates;
+    if let Some(next_protocol_version) = next_protocol_version.as_ref() {
+        new_protocol_state.enacted_protocol_updates.insert(
+            post_execute_state_version,
+            next_protocol_version.to_string());
+    }
 
     (
         new_protocol_state,
-        enactable_protocol_updates.into_iter().next(),
+        next_protocol_version,
     )
 }
 

@@ -9,6 +9,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 use transaction::prelude::TransactionPayloadPreparable;
 use transaction::validation::{NotarizedTransactionValidator, ValidationConfig};
+use utils::btreemap;
 
 use crate::epoch_handling::EpochAwareAccuTreeFactory;
 use crate::traits::{
@@ -317,6 +318,7 @@ impl TxnCommitStateUpdateExecutorHelper {
         let dummy_protocol_state = ProtocolState {
             current_epoch: None,
             current_protocol_version: self.protocol_version_name.clone(),
+            enacted_protocol_updates: btreemap!(),
             unenacted_protocol_updates: vec![],
         };
         let mut series_executor = TransactionSeriesExecutor::new(
